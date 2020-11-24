@@ -1,0 +1,73 @@
+1. Insert a new seller
+  INSERT INTO Person
+  VALUES('yao.578@osu.edu', 'zhijian', 600);
+     
+  INSERT into Seller
+  VALUES('yao.578@osu.edu', 'blog', 'bio', 'socialmedia');
+2. Insert a new intellectual product
+  INSERT INTO Certification
+  VALUES ('8888', 'OSU', 4.5, '12/3/2019');
+
+  INSERT INTO Intellectual_Product
+  VALUES ('88888888', 'IP', 'example', 12.5, 'pdf', 'Paypal',
+          'URL', 'yao.578@osu.edu', '8888');
+3. Insert a new buyer
+  INSERT INTO Person
+  VALUES('yao.777@osu.edu', 'Allen', 666);
+
+  INSERT INTO Buyer
+  VALUES('yao.777@osu.edu');
+4. Insert a new order
+  INSERT into Payment
+  VALUES('666666', '12/3/2019', 'Paypal', 'yao.777@osu.edu');
+
+  INSERT INTO Purchase_History
+  VALUES('7777777', '12/3/2019', 1, 'yao.777@osu.edu', '666666');
+
+  INSERT INTO PH_IP
+  VALUES('7777777', '88888888');
+
+
+Delete samples 
+1. Delete a order
+  DELETE FROM PH_IP
+  WHERE transaction_number = '7777777';
+
+  DELETE from Purchase_History
+  WHERE transaction_number = '7777777';
+
+  DELETE FROM Payment
+  WHERE paymentid = '666666';
+
+2. Delete an intellectual product
+  DELETE FROM Intellectual_Product
+  WHERE productid = '88888888';
+
+  DELETE FROM Certification
+  WHERE certification_number = '8888';
+
+3. Delete a seller
+  DELETE from Seller
+  WHERE email = 'yao.578@osu.edu';
+
+  DELETE FROM Person
+  WHERE email = 'yao.578@osu.edu';
+
+4. Delete a buyer
+  DELETE from Buyer
+  WHERE email = 'yao.777@osu.edu';
+
+  DELETE FROM Person
+  WHERE email = 'yao.777@osu.edu';
+
+5. Delete seller photo
+  DELETE FROM Seller_Photo
+  WHERE email = 'stiron6@ihg.com';
+
+6. Delete feedback
+  DELETE FROM Feedback
+  WHERE feedbackid = '99825';
+
+7. Delete IP image
+  DELETE FROM IP_Image
+  WHERE productid = '97621584';

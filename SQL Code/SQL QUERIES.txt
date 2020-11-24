@@ -1,0 +1,199 @@
+Simple Query
+1.Find the titles of all IP Items by a given Seller that cost less than $10 (you choose how to designate the seller)
+
+SELECT IP.title
+FROM Intellectual_Product AS IP, Person AS P, Seller
+WHERE IP.Email= P.Email
+      AND P.Email = Seller.email
+      AND IP.Price <10;
+
+2.Give all the titles and their dates of purchase made by given buyer (you choose how to designate the buyer)
+
+SELECT IP.Title, Payment.Date 
+From Intellectual_Product AS IP, Payment, Person, Buyer
+WHERE IP.Email = Person.Email
+	 AND Payment.Email = Buyer.email
+      AND Payment.Email = Person.email
+      AND Buyer.email = "skedwell3@tmall.com";
+
+3.Find the seller names for all sellers with less than 5 IP Items for sale
+
+SELECT P.Name
+FROM   Intellectual_Product AS IP, Person AS P
+WHERE  IP.Email = P.Email
+GROUP BY IP.Title
+HAVING SUM(IP.Title) <5;
+
+4.Give all the buyers who purchased a IP Item by a given seller and the names of the IP Items they purchased
+
+FROM Intellectual_Product AS IP, Person, Purchase_History AS PH, PH_IP 
+WHERE PH.Email = Person.Email
+      AND PH.Transaction_Number = PH_IP.Transaction_Number
+      AND PH_IP.ProductID = IP.ProductID;
+
+5.Find the total number of IP Items purchased by a single buyer (you choose how to designate the buyer)
+
+SELECT COUNT(PH.transaction_number)
+FROM   Person AS PB, Purchase_History AS PH, Buyer
+WHERE  PB.Email = PH.Email AND
+       PB.Email = Buyer.Email
+6.Finds the buyer who has purchased the most IP Items and the total number of IP Items they have purchased
+
+SELECT MAX(TotalItem), Name 
+FROM
+ (SELECT SUM(PH.Amount) AS TotalItem, P.Name AS Name
+  FROM Purchase_History AS PH, Person AS P
+  WHERE PH.Email= P.Email
+ );
+
+Advanced Query
+1.Provide a list of buyer names, along with the total dollar amount each buyer has spent.
+
+SELECT P.Name, SUM(IP.Price)
+FROM Person AS P, Purchase_History AS PH, Intellectual_Product AS IP 
+WHERE P.Email = PH.Email
+GROUP BY P.Name;
+
+2.Provide a list of buyer names and e-mail addresses for buyers who have spent more than the average buyer.
+
+SELECT P.Name, P.Email
+FROM Person AS P, Purchase_History AS PH, Intellectual_Product AS IP
+WHERE P.Email = PH.Email
+GROUP BY P.Name
+HAVING SUM(IP.Price*PH.Amount) > 
+(SELECT AVG(Price)
+            FROM 
+   (SELECT SUM(IP.Price*PH.Amount) As Price
+            	From  Person AS P, Purchase_History AS PH, .                Intellectual_Product AS IP
+                 WHERE P.Email = PH.Email
+       		 GROUP BY P.Name)
+             )
+3. Provide a list of the IP Item names and associated total copies sold to all buyers, sorted from the IP Item that has sold the most individual copies to the IP Item that has sold the least.
+
+SELECT IP.Title, SUM(PH.Amount)
+FROM Purchase_History AS PH, Intellectual_Product AS IP, PH_IP 
+WHERE IP.ProductID = PH_IP.ProductID
+      AND PH.Transaction_Number = PH_IP.Transaction_Number
+GROUP BY IP.Title
+ORDER BY SUM(PH.Amount) DESC
+
+4. Provide a list of the IP Item names and associated dollar totals for copies sold to all buyers, sorted from the IP Item that has sold the highest dollar amount to the IP Item that has sold the smallest.
+
+SELECT IP.Title, SUM(PH.Amount)*IP.Price
+FROM Purchase_History AS PH, Intellectual_Product AS IP, PH_IP 
+WHERE IP.ProductID = PH_IP.ProductID
+      AND PH.Transaction_Number = PH_IP.Transaction_Number
+GROUP BY IP.Title
+ORDER BY SUM(PH.Amount)*IP.Price DESC
+
+5.Find the most popular Seller (i.e. the one who has sold the most IP Items)
+
+SELECT Email, MAX(Total)    
+FROM(   
+	SELECT SUM(total) AS Total, Email
+     FROM(
+  SELECT S.email, PH.transaction_number, PH.amount as .       total
+  FROM Purchase_History as PH, Intellectual_Product as 
+          IP, Person AS P, Seller AS S, PH_IP as PI
+  WHERE PI.Transaction_Number = PH.transaction_number
+           AND PI.productid = IP.productid 
+AND IP.email = P.email
+AND S.email = P.email
+  GROUP by PH.transaction_number )
+          GROUP BY Email)
+
+6.Find the most profitable seller (i.e. the one who has brought in the most money)
+
+SELECT Email, MAX(Total)    
+FROM(   
+    SELECT SUM(total) AS Total, Email
+    FROM(
+    	    SELECT S.email, PH.transaction_number, 
+                (SUM(IP.price * PH.amount)) as total
+   	    From Purchase_History as PH, Intellectual_Product
+              as IP, Person AS P, Seller AS S, PH_IP as PI
+   	    WHERE PI.Transaction_Number =
+                PH.transaction_number AND
+     			PI.productid = IP.productid AND
+           	IP.email = P.email AND
+           	S.email = P.email
+     	   GROUP by PH.transaction_number )
+   GROUP BY Email)
+
+7.Provide a list of buyer names for buyers who purchased anything listed by the most profitable Seller.
+
+SELECT P.Name
+FROM Person AS P, Purchase_History AS PH, Intellectual_Product AS IP, PH_IP
+WHERE P.Email = PH.Email
+ 	AND PH_IP.ProductID = IP.productid
+ 	AND PH.Transaction_Number = PH_IP.Transaction_Number
+ 	AND IP.Email = 
+(SELECT email
+ FROM (SELECT Email, MAX(Total)    
+   	  FROM(   
+               SELECT SUM(total) AS Total, Email
+               FROM(
+                    SELECT S.email, PH.transaction_number,
+                           PH.amount as total
+                    From Purchase_History as PH,
+                         Intellectual_Product as IP, 
+                         Person AS P, Seller AS S, PH_IP 
+                         as PI
+                    WHERE PI.Transaction_Number =
+                          PH.transaction_number AND
+                          PI.productid = IP.productid AND
+                          IP.email = P.email AND
+                          S.email = P.email
+                    GROUP by PH.transaction_number )
+                GROUP BY Email)))
+
+8.Provide the list of sellers who listed the IP Items purchased by the buyers who have spent more than the average buyer. 
+SELECT sellerEmail
+      FROM (SELECT Buyer.email AS buyerEmail, IP.email as
+                    sellerEmail
+ 	      FROM Purchase_History as PH, PH_IP, 
+                Intellectual_Product AS IP, Person AS PB,
+                Buyer
+	      Where PH.transaction_number = 
+                 PH_IP .transaction_number AND
+       	      IP.ProductID = PH_IP.productid AND
+       	      PH.email = PB.email AND
+  	           PB.email = Buyer.email
+           GROUP BY Buyer.email
+    HAVING SUM(IP.price * PH.amount) >
+   	(SELECT AVG(total)
+   	FROM( SELECT Buyer.email, SUM(IP.price * PH.amount)
+                  AS total
+        	 FROM Purchase_History as PH, PH_IP,
+                Intellectual_Product AS IP, Person AS P,
+                Buyer
+         	 WHERE PH.transaction_number = 
+                  PH_IP .transaction_number AND
+     	        	  IP.ProductID = PH_IP.productid AND
+ 		       PH.email = P.email AND
+ 		       P.email = Buyer.email
+         	GROUP BY Buyer.email)))
+
+Extra Query
+1.A List of all sellers and everything that they sell.
+
+SELECT P.Name, IP.Title
+FROM Person AS P, Intellectual_Product AS IP 
+WHERE P.Email = IP.email
+GROUP by P.Name
+
+2.The seller name whose average IP price is greater than 80
+
+SELECT P.Name, avg(IP.Price)
+FROM Person AS P, Intellectual_Product AS IP
+WHERE P.Email = IP.Email
+GROUP BY P.Name
+HAVING avg(IP.Price) > 80
+
+3. Select all purchases made with Paypal
+
+SELECT PH.Transaction_Number
+FROM Purchase_History AS PH, Payment
+WHERE PH.PaymentID = Payment.PaymentID
+     AND Payment.Type  = 'PayPal';
+

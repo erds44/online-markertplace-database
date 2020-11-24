@@ -1,0 +1,7 @@
+Index on Intellectual Product:
+CREATE INDEX IP_Index
+ON Intellectual_Product (ProductID, Title, Email);
+
+Index on Person:
+CREATE INDEX Person_Index
+ON Person (Email);

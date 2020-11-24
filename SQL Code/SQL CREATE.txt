@@ -1,0 +1,112 @@
+CREATE TABLE Certification
+(
+  Certification_Number INT         NOT NULL,
+  Institution          VARCHAR(99) NOT NULL,
+  Rate                 INT         NOT NULL, 
+  Date                 DATE        NOT NULL,
+  PRIMARY KEY(Certification_Number)
+);
+
+CREATE TABLE Person
+( 
+  Email  VARCHAR(99) NOT NULL,
+  Name   VARCHAR(99) NOT NULL,
+  Karma	 INT	     NOT NULL,
+  PRIMARY KEY(Email) 
+);
+
+CREATE TABLE Buyer
+( 
+  Email  VARCHAR(99) NOT NULL,
+  FOREIGN KEY(Email) REFERENCES Person(Email) 
+);
+
+CREATE TABLE Seller
+( 
+  Email  VARCHAR(99) NOT NULL,
+  Blog   VARCHAR(99) UNIQUE ,
+  Bio    VARCHAR(9999),
+  Social_Media VARCHAR(99) UNIQUE,
+  FOREIGN KEY(Email) REFERENCES Person(Email) 
+);
+
+CREATE TABLE Seller_Photo
+(
+ Photo   VARCHAR(999) NOT NULL,
+ Email   VARCHAR(99),
+ PRIMARY KEY(Photo),
+ FOREIGN KEY(Email) REFERENCES Person(Email)
+);
+
+CREATE TABLE Feedback
+( 
+  FeedbackID INT    NOT NULL,
+  Date	     DATE   NOT NULL,
+  Comments   VARCHAR(999) NOT NULL,
+  BEmail     VARCHAR(99),
+  SEmail     VARCHAR(99),
+  PRIMARY KEY(FeedbackID),
+  FOREIGN KEY(BEmail) REFERENCES Person(Email), 
+  FOREIGN KEY(SEmail) REFERENCES Person(Email) 
+);
+
+CREATE TABLE Payment
+(
+  PaymentID          INT         NOT NULL,
+  Date               DATE        NOT NULL,
+  Type               VARCHAR(99) NOT NULL,
+  Email              VARCHAR(99),
+  PRIMARY KEY(PaymentID),
+  FOREIGN KEY(Email) REFERENCES Person(Email) 
+);
+
+CREATE TABLE Purchase_History
+(
+  Transaction_Number INT NOT    NULL,
+  Date               DATE NOT   NULL,
+  Amount Sold        INT NOT    NULL,
+  Email              VARCHAR(99),
+  PaymentID          INT,
+  PRIMARY KEY(Transaction_Number),
+  FOREIGN KEY(Email) REFERENCES Person(Email),
+  FOREIGN KEY(PaymentID) REFERENCES Payment(PaymentID)
+);
+
+CREATE TABLE Intellectual_Product
+(
+  ProductID            INT        NOT NULL,
+  Title                VARCHAR(99)  NOT NULL,
+  Description          VARCHAR(999),
+  Price                REAL          NOT NULL,
+  File Type            VARCHAR(99)  NOT NULL,
+  Accepted Payment     VARCHAR(99)  NOT NULL,
+  Download URL         VARCHAR(999) NOT NULL,
+  Email                VARCHAR(99),
+  Certification_Number INT,
+  PRIMARY KEY(ProductID),
+  FOREIGN KEY(Email) REFERENCES Person(Email),
+  FOREIGN KEY(Certification_Number) REFERENCES Certification(Certification_Number)
+);
+
+CREATE TABLE IP_Image
+(
+  Image  VARCHAR(99) NOT NULL,
+  ProductID  INT,
+  PRIMARY KEY(Image),
+  FOREIGN KEY(ProductID) REFERENCES Intellectual_Product(ProductID)
+);
+
+CREATE TABLE PH_IP
+(
+  Transaction_Number INT NOT    NULL,
+  ProductID            INT        NOT NULL,
+  FOREIGN KEY(Transaction_Number) REFERENCES Purchase_History(Transaction_Number),
+  FOREIGN KEY(ProductID) REFERENCES Intellectual_Product(ProductID)
+);
+
+
+
+
+
+
+
